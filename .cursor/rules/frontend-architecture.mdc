@@ -1,0 +1,25 @@
+---
+description: Anytime when there is a new component or design fixes
+globs: 
+alwaysApply: false
+---
+### Tech stack
+
+1. NextJS Pages Router
+2. Better Auth for Authentication 
+3. Drizzle for DB
+4. TailwindCSS for Styling
+5. ShadCN for components. 
+
+
+### New Design component
+
+1. Use only ShadCN components under `components/ui`
+2. Use Tailwind Colors and Add both dark and light theme colors
+3. Do not use Radix components directly.
+
+
+### Typescript 
+
+1. Never use async await, always use promise chaining
+2. 
