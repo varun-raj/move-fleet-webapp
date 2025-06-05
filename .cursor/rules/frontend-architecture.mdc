@@ -22,4 +22,11 @@ alwaysApply: false
 ### Typescript 
 
 1. Never use async await, always use promise chaining
-2. 
+2. Use NextJS's Page Router for routing and structure.
+
+### Data Fetching and submission
+
+1. Use @tanstack/react-query package for data fetching 
+  - When there is a long list use infinite query 
+2. The form data for submission should be stored in `formData` state and used upon submission.
+3. Form should have `submitting` flag to show the submission loader and disable the submit button when the flag is true.
