@@ -15,6 +15,13 @@
       "when": 1749098897227,
       "tag": "0001_busy_aaron_stack",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749102438300,
+      "tag": "0002_chemical_tarot",
+      "breakpoints": true
     }
   ]
 }
