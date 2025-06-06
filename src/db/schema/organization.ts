@@ -1,5 +1,7 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
+
+const organizationType = pgEnum("organization_type", ["clearing_agency", "transporter", "delivery_agency"]);
 
 export const organization = pgTable("organization", {
   id: uuid('id').primaryKey(),
@@ -7,7 +9,8 @@ export const organization = pgTable("organization", {
   slug: text('slug').unique(),
   logo: text('logo'),
   createdAt: timestamp('created_at').notNull(),
-  metadata: text('metadata')
+  metadata: jsonb('metadata'),
+  organizationType: organizationType('organization_type').default('clearing_agency').notNull()
 });
 
 export const member = pgTable("member", {
