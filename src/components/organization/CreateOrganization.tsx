@@ -3,16 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 import { slugify } from '@/lib/helpers/string.helper';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { createOrganization } from '@/lib/apiHandlers/organization.apiHandler';
+
+const organizationTypes = [
+  { label: 'Clearing Agency', value: 'clearing_agency' },
+  { label: 'Transporter', value: 'transporter' },
+  { label: 'Delivery Agency', value: 'delivery_agency' },
+];
 
 export default function CreateOrganization() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
+    organizationType: '',
   });
   const [autoGenerateSlug, setAutoGenerateSlug] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -28,21 +36,24 @@ export default function CreateOrganization() {
     setSubmitting(true);
 
     // Placeholder for user's integration logic
-    return authClient.organization.create({
+    return createOrganization({
       name: formData.name,
       slug: formData.slug || autoGenerateSlug,
-    }).then((res) => {
-      if (res.error) {
-        toast.error(res.error.message);
-        setSubmitting(false);
-      } else {
-        toast.success('Organization created successfully, redirecting to organization page...');
-        router.push(`/organization/${res.data?.id}`);
+      organizationType: formData.organizationType as "clearing_agency" | "transporter" | "delivery_agency",
+    }).then((orgData) => {
+      toast.success('Organization created successfully, redirecting to organization page...');
+      if (orgData?.organizationType === "clearing_agency") {
+        router.push(`/ca/${orgData?.slug}`);
+      } else if (orgData?.organizationType === "transporter") {
+        router.push(`/t/${orgData?.slug}`);
+      } else if (orgData?.organizationType === "delivery_agency") {
+        router.push(`/da/${orgData?.slug}`);
       }
-    }).catch((err) => {
-      toast.error(err.message);
-      setSubmitting(false);
-    });
+    })
+      .catch((err) => {
+        toast.error(err.message);
+        setSubmitting(false);
+      });
 
     // User might want to clear fields or give other feedback here
   };
@@ -99,6 +110,23 @@ export default function CreateOrganization() {
               <p className="text-xs text-muted-foreground">
                 This will be part of the URL. Use lowercase letters, numbers, and hyphens.
               </p>
+            </div>
+
+            {/* Add Organziation Type Dropdown */}
+            <div className="space-y-2">
+              <Label htmlFor="orgType" className="text-sm font-medium text-foreground">
+                Organization Type
+              </Label>
+              <Select value={formData.organizationType} onValueChange={(value) => setFormData({ ...formData, organizationType: value })}  >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Organization Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizationTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <Button

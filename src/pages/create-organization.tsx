@@ -1,5 +1,5 @@
 import CreateOrganization from '@/components/organization/CreateOrganization';
-import { checkAuth } from '@/lib/middleware/checkAuth.middleware'
+import { checkAuthSSR } from '@/lib/middleware/checkAuth.middleware'
 import React from 'react'
 
 export default function CreateOrganizationPage() {
@@ -8,5 +8,5 @@ export default function CreateOrganizationPage() {
   )
 }
 
-export const getServerSideProps = checkAuth();
+export const getServerSideProps = checkAuthSSR();
 

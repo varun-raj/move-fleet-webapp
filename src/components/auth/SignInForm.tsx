@@ -17,6 +17,7 @@ import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -89,6 +90,13 @@ export function SignInForm() {
             </Button>
           </form>
         </Form>
+
+        {/* Signup Link */}
+        <div className="text-center mt-4">
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account? <Link href="/auth/signup">Sign up</Link>
+          </p>
+        </div>
       </CardContent>
     </Card>
   )

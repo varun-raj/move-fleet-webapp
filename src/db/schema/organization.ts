@@ -1,17 +1,27 @@
-import { jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
-
-const organizationType = pgEnum("organization_type", ["clearing_agency", "transporter", "delivery_agency"]);
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 
 export const organization = pgTable("organization", {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   slug: text('slug').unique(),
   logo: text('logo'),
-  createdAt: timestamp('created_at').notNull(),
   metadata: jsonb('metadata'),
-  organizationType: organizationType('organization_type').default('clearing_agency').notNull()
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  organizationType: text('organization_type', { enum: ["clearing_agency", "transporter", "delivery_agency"] }).default('clearing_agency').notNull()
 });
+
+export const organizationCreateSchema = createInsertSchema(organization);
+
+
+export const organizationUpdateSchema = createUpdateSchema(organization);
+
+export const organizationSelectSchema = createSelectSchema(organization);
+
+
+export type Organization = typeof organization.$inferSelect;
+export type OrganizationCreate = typeof organization.$inferInsert;
 
 export const member = pgTable("member", {
   id: uuid('id').primaryKey(),
@@ -29,4 +39,12 @@ export const invitation = pgTable("invitation", {
   status: text('status').default('pending').notNull(),
   expiresAt: timestamp('expires_at').notNull(),
   inviterId: uuid('inviter_id').notNull().references(() => user.id, { onDelete: 'cascade' })
+});
+
+export const partnership = pgTable("partnership", {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sourceOrganizationId: uuid('source_organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  targetOrganizationId: uuid('target_organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull()
 });

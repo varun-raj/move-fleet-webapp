@@ -32,6 +32,8 @@ export const auth = betterAuth({
     autoSignIn: true,
   },
   plugins: [
-    organization()
+    organization({
+      creatorRole: "admin",
+    })
   ]
 })

@@ -11,13 +11,14 @@ interface CheckAuthResult {
   };
 }
 
-export const checkAuth = (handler?: (context: GetServerSidePropsContext) => Promise<CheckAuthResult>) => {
+export const checkAuthSSR = (handler?: (context: GetServerSidePropsContext) => Promise<CheckAuthResult>) => {
   return async (context: GetServerSidePropsContext) => {
     const session = await getSessionInServer(context.req);
+    console.log("session", session);
     if (!session) {
       return {
         redirect: {
-          destination: "/signin",
+          destination: "/auth/signin",
           permanent: false,
         },
       };
@@ -29,14 +30,14 @@ export const checkAuth = (handler?: (context: GetServerSidePropsContext) => Prom
         ...result,
         props: {
           ...result.props,
-          session,
+          ...session,
         },
       };
     }
 
     return {
       props: {
-        session: JSON.parse(JSON.stringify(session)),
+        session: session,
       },
     };
   };
