@@ -31,6 +31,9 @@ export const member = pgTable("member", {
   createdAt: timestamp('created_at').notNull()
 });
 
+export type Member = typeof member.$inferSelect;
+export type MemberCreate = typeof member.$inferInsert;
+
 export const invitation = pgTable("invitation", {
   id: uuid('id').primaryKey(),
   organizationId: uuid('organization_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),

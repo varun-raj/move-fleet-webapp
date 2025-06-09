@@ -49,7 +49,7 @@ A bid is a proposal to transport a consignment. Initiated by the transporter.
 2. A bid will be to a specific vehicle.
 
 ### JobBidLineItem
-A bid line item is a line item in a bid that represents a consignment.
+A bid line item is a line item in a bid that represents a consignment where the transporter can bid for a specific consignment and vehicle.
 
 
 ### Vehicles

@@ -9,3 +9,4 @@ export const listOrganizations = async (): Promise<Organization[]> => {
 export const createOrganization = async (organization: OrganizationCreate): Promise<Organization> => {
   return API.post(CREATE_ORGANIZATION_PATH, organization) as Promise<Organization>;
 };
+

@@ -17,12 +17,71 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+
+type isActiveProps = {
+  pathname: string;
+  asPath: string;
+  query: ParsedUrlQuery;
+}
+interface SidebarItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  isActive: (props: isActiveProps) => boolean;
+}
+
+const sidebarItems: SidebarItem[] = [
+  {
+    label: "Dashboard",
+    href: "/ca/dashboard",
+    icon: Home,
+    isActive: ({ pathname, }) => {
+      return pathname === "/ca/dashboard";
+    }
+  },
+  {
+    label: "Jobs",
+    href: "/ca/jobs",
+    icon: Truck,
+    isActive: ({ pathname }) => {
+      return pathname === "/ca/jobs";
+    }
+  },
+  {
+    label: "Yards",
+    href: "/ca/yards",
+    icon: Building,
+    isActive: ({ pathname }) => {
+      return pathname === "/ca/yards";
+    }
+  },
+  {
+    label: "Transport Partners",
+    href: "/ca/transporters",
+    icon: Users,
+    isActive: ({ pathname }) => {
+      return pathname === "/ca/transporters";
+    }
+  },
+  {
+    label: "Settings",
+    href: "/ca/settings",
+    icon: Settings,
+    isActive: ({ pathname }) => {
+      return pathname === "/ca/settings";
+    }
+  },
+];
 
 export function ClearingAgencyLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { pathname, query, asPath } = useRouter();
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -39,43 +98,22 @@ export function ClearingAgencyLayout({
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              <Link
-                href="/ca/dashboard"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Home className="h-4 w-4" />
-                Dashboard
-              </Link>
-              <Link
-                href="/ca/jobs"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Truck className="h-4 w-4" />
-                Jobs
-              </Link>
-              <Link
-                href="/ca/yards"
-                className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-              >
-                <Building className="h-4 w-4" />
-                Yards
-              </Link>
-              <Link
-                href="/ca/transporters"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Users className="h-4 w-4" />
-                Transporters
-              </Link>
-              <Link
-                href="/ca/settings"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
+              {sidebarItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                    item.isActive({ pathname: pathname, query: query, asPath: asPath }) && "bg-primary text-primary-foreground"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              ))}
             </nav>
           </div>
+
           <div className="mt-auto p-4">
             <Card>
               <CardHeader className="p-2 pt-0 md:p-4">
