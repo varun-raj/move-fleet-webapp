@@ -67,7 +67,7 @@ export const jobBidLineItem = pgTable("job_bid_line_item", {
 
 
 export type Job = typeof job.$inferSelect;
-export type JobCreate = typeof job.$inferInsert & {
+export type JobCreate = Omit<typeof job.$inferInsert, "userId" | "organizationId"> & {
   fromLocationId: string;
   toLocationId: string;
   consignments: Pick<JobConsignmentCreate, 'containerIdentifier' | 'containerType'>[];

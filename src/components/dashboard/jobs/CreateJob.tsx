@@ -31,6 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useMutation } from "@tanstack/react-query";
+import { createJob } from "@/lib/apiHandlers/job.apiHandler";
+import { useRouter } from "next/router";
+import { Loader2 } from "lucide-react";
 
 const consignmentSchema = z.object({
   containerIdentifier: z.string().min(1, "Container identifier is required"),
@@ -55,6 +59,8 @@ const dummyLocations = [
 export default function CreateJob() {
   const [ft20, setFt20] = useState(0);
   const [ft40, setFt40] = useState(0);
+  const router = useRouter();
+  const { organizationSlug } = router.query;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -82,9 +88,34 @@ export default function CreateJob() {
     append(newConsignments);
   };
 
-  async function onSubmit(values: FormValues) {
-    console.log(values);
-    toast.success("Job created successfully!");
+  const { mutate: createJobMutation, isPending: isSubmitting } = useMutation({
+    mutationFn: ({ job, organizationSlug }: { job: Parameters<typeof createJob>[0], organizationSlug: string }) => createJob(job, organizationSlug),
+    onSuccess: (data) => {
+      toast.success("Job created successfully!");
+      // TODO: Redirect to the job details page
+      console.log("Newly created job", data);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create job");
+    },
+  });
+
+  function onSubmit(values: FormValues) {
+    if (typeof organizationSlug !== "string") {
+      toast.error("Organization slug not found");
+      return;
+    }
+
+    const { fromLocation, toLocation, dueDate, ...rest } = values;
+
+    const jobData = {
+      ...rest,
+      fromLocationId: fromLocation,
+      toLocationId: toLocation,
+      dueDate: new Date(dueDate),
+    };
+
+    createJobMutation({ job: jobData, organizationSlug });
   }
 
   return (
@@ -242,7 +273,10 @@ export default function CreateJob() {
               </CardContent>
             </Card>
 
-            <Button type="submit">Create Job</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Job
+            </Button>
           </form>
         </Form>
       </CardContent>
