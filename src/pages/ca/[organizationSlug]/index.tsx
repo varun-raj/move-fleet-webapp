@@ -1,9 +1,8 @@
-import { ClearingAgencyLayout } from "@/components/layouts/clearing-agency-layout";
 import { checkOrg } from "@/lib/middleware/checkOrg.middleware";
 
 export default function Dashboard() {
   return (
-    <ClearingAgencyLayout>
+    <div>
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
       </div>
@@ -19,8 +18,8 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
-    </ClearingAgencyLayout>
+    </div>
   );
 }
 
-export const getServerSideProps = checkOrg;
+export const getServerSideProps = checkOrg();

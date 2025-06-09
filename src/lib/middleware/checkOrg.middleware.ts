@@ -1,12 +1,11 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { getSessionInServer } from "../helpers/session.helper";
-import { db } from "@/db";
-import { and, eq } from "drizzle-orm";
-import { member, organization, user } from "@/db/schema";
+import { user } from "@/db/schema";
 import { Session } from "better-auth";
+import { OrganizationService } from "@/services/organization.service";
 
-type TOrg = NonNullable<Awaited<ReturnType<typeof getOrg>>>;
-type TMember = NonNullable<Awaited<ReturnType<typeof getMember>>>;
+type TOrg = NonNullable<Awaited<ReturnType<typeof OrganizationService.getOrgBySlug>>>;
+type TMember = NonNullable<Awaited<ReturnType<typeof OrganizationService.getMember>>>;
 type TUser = typeof user.$inferSelect;
 
 // This is the actual shape of the session object
@@ -21,20 +20,6 @@ export interface CheckOrgResult {
   member: TMember;
 }
 
-const getOrg = async (organizationId: string) => {
-  return await db.query.organization.findFirst({
-    where: eq(organization.id, organizationId),
-  });
-};
-
-const getMember = async (organizationId: string, userId: string) => {
-  return await db.query.member.findFirst({
-    where: and(
-      eq(member.organizationId, organizationId),
-      eq(member.userId, userId)
-    ),
-  });
-};
 
 export const checkOrg = <P extends { [key: string]: unknown }>(
   handler?: (
@@ -44,7 +29,7 @@ export const checkOrg = <P extends { [key: string]: unknown }>(
   return async (
     context: GetServerSidePropsContext
   ): Promise<GetServerSidePropsResult<CheckOrgResult & P>> => {
-    const { organizationId } = context.params as { organizationId: string };
+    const { organizationSlug } = context.params as { organizationSlug: string };
     const session = (await getSessionInServer(
       context.req
     )) as SessionWithUser | null;
@@ -58,14 +43,14 @@ export const checkOrg = <P extends { [key: string]: unknown }>(
       };
     }
 
-    const org = await getOrg(organizationId);
+    const org = await OrganizationService.getOrgBySlug(organizationSlug);
     if (!org) {
       return {
         notFound: true,
       };
     }
 
-    const mem = await getMember(organizationId, session.user.id);
+    const mem = await OrganizationService.getMember(org.id, session.user.id);
     if (!mem) {
       return {
         redirect: {
