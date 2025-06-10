@@ -11,3 +11,7 @@ export const LIST_JOBS_PATH = (organizationSlug: string) => `/api/manage/${organ
 export const CREATE_LOCATION_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/locations/create`;
 export const LIST_LOCATIONS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/locations/list`;
 export const GET_LOCATION_PATH = (organizationSlug: string, locationId: string) => `/api/manage/${organizationSlug}/locations/${locationId}`;
+
+// Partnerships
+export const CREATE_PARTNERSHIP_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/create`;
+export const LIST_PARTNERSHIPS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/list`;

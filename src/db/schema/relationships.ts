@@ -18,7 +18,9 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   invitations: many(invitation),
   sourcePartnerships: many(partnership, { relationName: "sourceOrganization" }),
   targetPartnerships: many(partnership, { relationName: "targetOrganization" }),
-  vehicles: many(vehicle)
+  vehicles: many(vehicle),
+  partners: many(partnership, { relationName: "sourceOrganization" }),
+  partnerOf: many(partnership, { relationName: "targetOrganization" })
 }));
 
 export const memberRelations = relations(member, ({ one }) => ({
@@ -120,3 +122,14 @@ export const jobBidLineItemRelations = relations(jobBidLineItem, ({ one }) => ({
   })
 }));
 
+
+export const partnershipRelations = relations(partnership, ({ one }) => ({
+  sourceOrganization: one(organization, {
+    fields: [partnership.sourceOrganizationId],
+    references: [organization.id]
+  }),
+  targetOrganization: one(organization, {
+    fields: [partnership.targetOrganizationId],
+    references: [organization.id]
+  })
+}));

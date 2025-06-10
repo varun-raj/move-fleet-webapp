@@ -65,10 +65,10 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     label: "Transport Partners",
-    href: "/ca/[organizationSlug]/transporters",
+    href: "/ca/[organizationSlug]/partners",
     icon: Users,
     isActive: ({ pathname }) => {
-      return pathname === "/ca/transporters";
+      return pathname === "/ca/partners";
     }
   },
   {
