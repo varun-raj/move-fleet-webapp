@@ -25,7 +25,7 @@ import { PlusCircle } from "lucide-react";
 import { partnership, Organization } from "@/db/schema";
 
 type Partnership = typeof partnership.$inferSelect;
-type PartnershipWithPartner = Partnership & { partner: Organization };
+type PartnershipWithPartner = Partnership & { targetOrganization: Organization };
 
 export default function ListPartnerships() {
   const router = useRouter();
@@ -77,8 +77,8 @@ export default function ListPartnerships() {
             {partnerships && partnerships.length > 0 ? (
               partnerships.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell>{p.partner.name}</TableCell>
-                  <TableCell>{p.partner.organizationType}</TableCell>
+                  <TableCell>{p.targetOrganization.name}</TableCell>
+                  <TableCell>{p.targetOrganization.organizationType}</TableCell>
                 </TableRow>
               ))
             ) : (

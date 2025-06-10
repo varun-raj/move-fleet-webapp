@@ -42,7 +42,7 @@ export class OrganizationService {
         eq(partnership.targetOrganizationId, organizationId)
       ),
       with: {
-        partner: true,
+        targetOrganization: true,
       },
     })
   }

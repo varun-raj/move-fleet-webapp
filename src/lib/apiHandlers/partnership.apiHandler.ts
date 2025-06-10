@@ -5,7 +5,7 @@ import { CREATE_PARTNERSHIP_PATH } from "@/config/routes";
 import { LIST_PARTNERSHIPS_PATH } from "@/config/routes";
 
 export type Partnership = typeof partnership.$inferSelect;
-export type PartnershipWithPartner = Partnership & { partner: Organization };
+export type PartnershipWithPartner = Partnership & { targetOrganization: Organization };
 
 export const listTransporters = async (): Promise<Organization[]> => {
   const response = await axios.get("/api/organization/transporters");
