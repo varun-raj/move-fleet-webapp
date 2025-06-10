@@ -5,7 +5,8 @@ import { Toaster } from "@/components/ui/sonner"
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { AuthLayout } from "@/components/layouts/auth-layout";
-import { ClearingAgencyLayout } from "@/components/layouts/clearing-agency-layout";
+import { ClearingAgencyLayout } from "@/components/layouts/ClearingAgencyLayout";
+import { TransporterLayout } from "@/components/layouts/TransporterLayout";
 import PrivateLayout from "@/components/layouts/private-layout";
 
 
@@ -23,15 +24,19 @@ export default function App({ Component, pageProps }: IAppProps) {
     if (pathname === "/") {
       return PrivateLayout;
     }
-    if (pathname.startsWith("/auth")) {
+    if (pathname.startsWith("/auth/")) {
       return AuthLayout;
     }
-    if (pathname.startsWith("/ca")) {
+    if (pathname.startsWith("/ca/")) {
       return ClearingAgencyLayout;
     }
 
-    return Component.getLayout || (({ children }) => children);
-  }, [Component, pathname]);
+    if (pathname.startsWith("/t/")) {
+      return TransporterLayout;
+    }
+
+    return AuthLayout;
+  }, [pathname]);
 
   return (
     <>

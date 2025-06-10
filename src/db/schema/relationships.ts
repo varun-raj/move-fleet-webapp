@@ -3,6 +3,7 @@ import { user } from "./auth";
 import { organization, member, invitation, partnership } from "./organization";
 import { vehicle } from "./vehicle";
 import { job, jobBid, jobBidLineItem, jobConsignment, } from "./job";
+import { location } from "./location";
 
 // User relationships
 export const userRelations = relations(user, ({ many }) => ({
@@ -55,6 +56,18 @@ export const jobRelations = relations(job, ({ many, one }) => ({
   user: one(user, {
     fields: [job.userId],
     references: [user.id]
+  }),
+  organization: one(organization, {
+    fields: [job.organizationId],
+    references: [organization.id]
+  }),
+  fromLocation: one(location, {
+    fields: [job.fromLocationId],
+    references: [location.id]
+  }),
+  toLocation: one(location, {
+    fields: [job.toLocationId],
+    references: [location.id]
   })
 }));
 

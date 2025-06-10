@@ -75,7 +75,7 @@ export default function JobDetails() {
             </div>
             <div>
               <p className="font-semibold">Status</p>
-              <p>{job.jobStatus || "-"}</p>
+              <p>{job.status || "-"}</p>
             </div>
           </div>
         </CardContent>

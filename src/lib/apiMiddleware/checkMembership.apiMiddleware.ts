@@ -8,7 +8,7 @@ import { Member, Organization } from "@/db/schema"
 interface ApiAuthWrapperProps {
   req: NextApiRequest
   res: NextApiResponse
-  allowedRoles: ("admin" | "member")[]
+  allowedRoles: ("admin" | "member" | "owner")[]
   allowedOrganizations: ("clearing_agency" | "transporter" | "delivery_agency")[]
   next: (req: NextApiRequest, res: NextApiResponse, session: {
     user: User

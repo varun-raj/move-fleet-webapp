@@ -10,6 +10,23 @@ export class OrganizationService {
     }).then((org) => dateToISOString(org));
   }
 
+  static async getPartnerIds(organizationId: string) {
+    const partnerships = await db.query.partnership.findMany({
+      where: or(
+        eq(partnership.sourceOrganizationId, organizationId),
+        eq(partnership.targetOrganizationId, organizationId)
+      ),
+      columns: {
+        sourceOrganizationId: true,
+        targetOrganizationId: true
+      }
+    });
+
+    return partnerships.map(p =>
+      p.sourceOrganizationId === organizationId ? p.targetOrganizationId : p.sourceOrganizationId
+    );
+  }
+
   static async getMember(orgId: string, userId: string) {
     return await db.query.member.findFirst({
       where: and(eq(member.organizationId, orgId), eq(member.userId, userId)),

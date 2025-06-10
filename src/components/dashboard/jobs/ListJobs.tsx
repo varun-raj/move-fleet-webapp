@@ -95,7 +95,7 @@ export default function ListJobs() {
                   <TableCell>
                     {job.dueDate ? new Date(job.dueDate).toLocaleDateString() : "-"}
                   </TableCell>
-                  <TableCell>{job.jobStatus}</TableCell>
+                  <TableCell>{job.status}</TableCell>
                 </TableRow>
               ))
             ) : (
