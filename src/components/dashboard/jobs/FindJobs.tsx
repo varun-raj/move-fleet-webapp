@@ -1,17 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { FindJobListItem, findJobs } from "@/lib/apiHandlers/job.apiHandler";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Card,
   CardContent,
@@ -19,13 +11,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
+import BidModal from "./BidModal";
 
 export default function FindJobs() {
   const router = useRouter();
   const { organizationSlug } = router.query;
+  const [isBidModalOpen, setIsBidModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<FindJobListItem | null>(null);
 
   const { data: jobs = [], isLoading } = useQuery<FindJobListItem[]>({
     queryKey: ["find-jobs", organizationSlug],
@@ -34,6 +27,16 @@ export default function FindJobs() {
   });
 
   console.log(jobs);
+
+  const handleOpenBidModal = (job: FindJobListItem) => {
+    setSelectedJob(job);
+    setIsBidModalOpen(true);
+  };
+
+  const handleCloseBidModal = () => {
+    setSelectedJob(null);
+    setIsBidModalOpen(false);
+  };
 
   if (isLoading) {
     return (
@@ -44,55 +47,79 @@ export default function FindJobs() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Find Jobs</CardTitle>
-            <CardDescription>
-              A list of all open jobs from your partners available for bidding.
-            </CardDescription>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Find Jobs</h1>
+        <p className="text-muted-foreground">
+          A list of all open jobs from your partners available for bidding.
+        </p>
+      </div>
+
+      {jobs && jobs.length > 0 ? (
+        <div className="space-y-4">
+          {jobs.map((job) => (
+            <Card key={job.id}>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle>
+                      {job.fromLocation.name} → {job.toLocation.name}
+                    </CardTitle>
+                    <CardDescription>
+                      {job.dueDate
+                        ? `Due by ${new Date(
+                          job.dueDate,
+                        ).toLocaleDateString()}`
+                        : "No due date specified"}
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenBidModal(job)}
+                    className="flex-shrink-0"
+                  >
+                    View & Bid
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    20ft Consignments
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {job.twentyFtConsignments}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border bg-muted/20 p-3">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    40ft Consignments
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {job.fortyFtConsignments}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>From</TableHead>
-              <TableHead>To</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {jobs && jobs.length > 0 ? (
-              jobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell>{job.fromLocation.name}</TableCell>
-                  <TableCell>{job.toLocation.name}</TableCell>
-                  <TableCell>
-                    {job.dueDate ? new Date(job.dueDate).toLocaleDateString() : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/tr/${organizationSlug}/jobs/${job.id}`}>
-                      <Button variant="outline" size="sm">
-                        View & Bid
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No biddable jobs found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+      ) : (
+        <Card>
+          <CardContent className="flex h-48 flex-col items-center justify-center space-y-2 text-center">
+            <p className="text-lg font-medium">No Biddable Jobs Found</p>
+            <p className="text-sm text-muted-foreground">
+              Check back later for more opportunities.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      <BidModal
+        isOpen={isBidModalOpen}
+        onClose={handleCloseBidModal}
+        job={selectedJob}
+        organizationSlug={organizationSlug as string}
+      />
+    </div>
   );
 }

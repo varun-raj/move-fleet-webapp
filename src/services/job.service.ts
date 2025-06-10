@@ -38,10 +38,12 @@ export class JobService {
       }
     });
 
+
     return jobs.map(job => ({
       ...job,
       jobConsignments: undefined,
-      consignmentCount: job.jobConsignments.length
+      twentyFtConsignments: job.jobConsignments.filter(consignment => consignment.containerType === '20ft').length,
+      fortyFtConsignments: job.jobConsignments.filter(consignment => consignment.containerType === '40ft').length,
     }));
   }
 }
