@@ -33,7 +33,7 @@ export const memberRelations = relations(member, ({ one }) => ({
 }));
 
 // Vehicle relationships
-export const vehicleRelations = relations(vehicle, ({ one }) => ({
+export const vehicleRelations = relations(vehicle, ({ one, many }) => ({
   organization: one(organization, {
     fields: [vehicle.organizationId],
     references: [organization.id]
@@ -41,7 +41,8 @@ export const vehicleRelations = relations(vehicle, ({ one }) => ({
   user: one(user, {
     fields: [vehicle.userId],
     references: [user.id]
-  })
+  }),
+  jobConsignments: many(jobConsignment)
 }));
 
 // Job relationships
@@ -63,11 +64,27 @@ export const jobConsignmentRelations = relations(jobConsignment, ({ one }) => ({
   user: one(user, {
     fields: [jobConsignment.userId],
     references: [user.id]
+  }),
+  vehicle: one(vehicle, {
+    fields: [jobConsignment.vehicleId],
+    references: [vehicle.id]
+  }),
+  transporter: one(user, {
+    fields: [jobConsignment.transporterId],
+    references: [user.id]
+  }),
+  bidLineItem: one(jobBidLineItem, {
+    fields: [jobConsignment.bidLineItemId],
+    references: [jobBidLineItem.id]
+  }),
+  bid: one(jobBid, {
+    fields: [jobConsignment.bidId],
+    references: [jobBid.id]
   })
 }));
 
 // JobRequest relationships
-export const jobBidRelations = relations(jobBid, ({ one }) => ({
+export const jobBidRelations = relations(jobBid, ({ one, many, }) => ({
   job: one(job, {
     fields: [jobBid.jobId],
     references: [job.id]
@@ -79,7 +96,8 @@ export const jobBidRelations = relations(jobBid, ({ one }) => ({
   vehicle: one(vehicle, {
     fields: [jobBid.vehicleId],
     references: [vehicle.id]
-  })
+  }),
+  bidLineItems: many(jobBidLineItem)
 }));
 
 

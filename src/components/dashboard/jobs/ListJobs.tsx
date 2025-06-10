@@ -24,11 +24,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
+type JobList = {
+  job: Job;
+  fromLocationName: string | null;
+  toLocationName: string | null;
+};
+
 export default function ListJobs() {
   const router = useRouter();
   const { organizationSlug } = router.query;
 
-  const { data: jobs, isLoading } = useQuery<Job[]>({
+  const { data: jobs, isLoading } = useQuery<JobList[]>({
     queryKey: ["jobs", organizationSlug],
     queryFn: () => listJobs(organizationSlug as string),
     enabled: !!organizationSlug,
@@ -74,11 +80,18 @@ export default function ListJobs() {
           </TableHeader>
           <TableBody>
             {jobs && jobs.length > 0 ? (
-              jobs.map((job) => (
+              jobs.map(({ job, fromLocationName, toLocationName }) => (
                 <TableRow key={job.id}>
-                  <TableCell>{job.id}</TableCell>
-                  <TableCell>{job.fromLocationId}</TableCell>
-                  <TableCell>{job.toLocationId}</TableCell>
+                  <TableCell>
+                    <Link
+                      href={`${router.asPath}/${job.id}`}
+                      className="hover:underline"
+                    >
+                      {job.id}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{fromLocationName}</TableCell>
+                  <TableCell>{toLocationName}</TableCell>
                   <TableCell>
                     {job.dueDate ? new Date(job.dueDate).toLocaleDateString() : "-"}
                   </TableCell>

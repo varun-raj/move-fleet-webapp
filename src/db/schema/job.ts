@@ -28,6 +28,12 @@ export const jobConsignment = pgTable("job_consignment", {
   containerIdentifier: text('container_identifier').notNull(),
   containerType: text('container_type', { enum: ['20ft', '40ft'] }).notNull(),
   userId: uuid('user_id').notNull(),
+  status: text('status', { enum: ['bidding', 'bidding_accepted', 'bidding_rejected', 'bidding_withdrawn', 'bidding_expired', 'bidding_cancelled', 'bidding_completed'] }).default('bidding').notNull(),
+  vehicleId: uuid('vehicle_id'),
+  price: integer('price'),
+  transporterId: uuid('transporter_id'),
+  bidLineItemId: uuid('bid_line_item_id'),
+  bidId: uuid('bid_id'),
   createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull()
 });

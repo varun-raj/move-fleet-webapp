@@ -31,10 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createJob } from "@/lib/apiHandlers/job.apiHandler";
 import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
+import { listLocations } from "@/lib/apiHandlers/location.apiHandler";
+import { Location } from "@/db/schema";
 
 const consignmentSchema = z.object({
   containerIdentifier: z.string().min(1, "Container identifier is required"),
@@ -45,22 +47,29 @@ const formSchema = z.object({
   fromLocation: z.string().min(1, "From location is required"),
   toLocation: z.string().min(1, "To location is required"),
   dueDate: z.string().min(1, "Due date is required"),
-  consignments: z.array(consignmentSchema).min(1, "At least one consignment is required"),
+  consignments: z
+    .array(consignmentSchema)
+    .min(1, "At least one consignment is required"),
+}).refine((data) => data.fromLocation !== data.toLocation, {
+  message: "From and To locations cannot be the same",
+  path: ["toLocation"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-const dummyLocations = [
-  { id: "loc1", name: "New York" },
-  { id: "loc2", name: "Los Angeles" },
-  { id: "loc3", name: "Chicago" },
-];
 
 export default function CreateJob() {
   const [ft20, setFt20] = useState(0);
   const [ft40, setFt40] = useState(0);
   const router = useRouter();
   const { organizationSlug } = router.query;
+
+  const { data: locations, isLoading: isLoadingLocations } = useQuery<
+    Location[]
+  >({
+    queryKey: ["locations", organizationSlug],
+    queryFn: () => listLocations(organizationSlug as string),
+    enabled: !!organizationSlug,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -71,6 +80,8 @@ export default function CreateJob() {
       consignments: [],
     },
   });
+
+  const fromLocationValue = form.watch("fromLocation");
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -92,8 +103,7 @@ export default function CreateJob() {
     mutationFn: ({ job, organizationSlug }: { job: Parameters<typeof createJob>[0], organizationSlug: string }) => createJob(job, organizationSlug),
     onSuccess: (data) => {
       toast.success("Job created successfully!");
-      // TODO: Redirect to the job details page
-      console.log("Newly created job", data);
+      router.push(`/ca/${organizationSlug}/jobs/${data.id}`);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to create job");
@@ -136,15 +146,25 @@ export default function CreateJob() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>From Location</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoadingLocations}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a location" />
+                          <SelectValue
+                            placeholder={
+                              isLoadingLocations
+                                ? "Loading..."
+                                : "Select a location"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {dummyLocations.map((loc) => (
-                          <SelectItem key={loc.id} value={loc.id}>
+                        {locations?.map((loc) => (
+                          <SelectItem key={loc.id} value={loc.id!}>
                             {loc.name}
                           </SelectItem>
                         ))}
@@ -160,18 +180,30 @@ export default function CreateJob() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>To Location</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoadingLocations || !fromLocationValue}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a location" />
+                          <SelectValue
+                            placeholder={
+                              isLoadingLocations
+                                ? "Loading..."
+                                : "Select a location"
+                            }
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {dummyLocations.map((loc) => (
-                          <SelectItem key={loc.id} value={loc.id}>
-                            {loc.name}
-                          </SelectItem>
-                        ))}
+                        {locations
+                          ?.filter((loc) => loc.id !== fromLocationValue)
+                          .map((loc) => (
+                            <SelectItem key={loc.id} value={loc.id!}>
+                              {loc.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
