@@ -13,15 +13,15 @@ export class JobService {
     return jobConsignments;
   }
 
-  static async getBiddableJobs(organizationIds: string[]) {
-    if (organizationIds.length === 0) {
+  static async getBiddableJobs(partnerIds: string[], transporterId: string) {
+    if (partnerIds.length === 0) {
       return [];
     }
 
 
     const jobs = await db.query.job.findMany({
       where: and(
-        inArray(job.organizationId, organizationIds),
+        inArray(job.organizationId, partnerIds),
         eq(job.status, 'active')
       ),
       with: {
@@ -29,6 +29,12 @@ export class JobService {
         toLocation: true,
         organization: true,
         jobConsignments: true,
+        bids: {
+          where: (jobBid, { eq }) => eq(jobBid.transporterId, transporterId),
+          columns: {
+            id: true,
+          }
+        }
       },
       columns: {
         id: true,
@@ -42,6 +48,8 @@ export class JobService {
     return jobs.map(job => ({
       ...job,
       jobConsignments: undefined,
+      bids: undefined,
+      hasBid: job.bids.length > 0,
       twentyFtConsignments: job.jobConsignments.filter(consignment => consignment.containerType === '20ft').length,
       fortyFtConsignments: job.jobConsignments.filter(consignment => consignment.containerType === '40ft').length,
     }));

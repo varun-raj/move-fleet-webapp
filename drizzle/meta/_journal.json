@@ -43,6 +43,13 @@
       "when": 1749561839954,
       "tag": "0005_wide_maelstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1749565536407,
+      "tag": "0006_chilly_mentor",
+      "breakpoints": true
     }
   ]
 }

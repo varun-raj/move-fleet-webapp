@@ -78,8 +78,9 @@ export default function FindJobs() {
                     size="sm"
                     onClick={() => handleOpenBidModal(job)}
                     className="flex-shrink-0"
+                    disabled={job.hasBid}
                   >
-                    View & Bid
+                    {job.hasBid ? "Bid Placed" : "View & Bid"}
                   </Button>
                 </div>
               </CardHeader>

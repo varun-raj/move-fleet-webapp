@@ -19,6 +19,7 @@ export type FindJobListItem = Job & {
   toLocation: Location;
   twentyFtConsignments: number;
   fortyFtConsignments: number;
+  hasBid: boolean;
 };
 
 export const getJob = async (

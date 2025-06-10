@@ -28,7 +28,7 @@ export default async function handler(
           return res.status(200).json([]);
         }
 
-        const jobs = await JobService.getBiddableJobs(partnerIds);
+        const jobs = await JobService.getBiddableJobs(partnerIds, organization.id);
 
         res.status(200).json(jobs);
       } catch (error) {

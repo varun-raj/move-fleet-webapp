@@ -49,7 +49,6 @@ export const jobBid = pgTable("job_bid", {
   id: uuid('id').defaultRandom().primaryKey(),
   jobId: uuid('job_id').notNull(),
   transporterId: uuid('transporter_id').notNull(),
-  vehicleId: uuid('vehicle_id').notNull(),
   userId: uuid('user_id').notNull(),
   status: text('status', { enum: ['pending', 'accepted', 'rejected', 'withdrawn'] }).default('pending').notNull(),
   createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),

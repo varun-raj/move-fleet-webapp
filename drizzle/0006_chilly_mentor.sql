@@ -1,0 +1,1 @@
+ALTER TABLE "job_bid" DROP COLUMN "vehicle_id";
