@@ -66,11 +66,12 @@ CREATE TABLE "member" (
 );
 --> statement-breakpoint
 CREATE TABLE "organization" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"slug" text,
 	"logo" text,
-	"created_at" timestamp NOT NULL,
+	"metadata" jsonb,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"organization_type" text DEFAULT 'clearing_agency' NOT NULL,
 	CONSTRAINT "organization_slug_unique" UNIQUE("slug")
 );
@@ -87,19 +88,17 @@ CREATE TABLE "location" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text,
 	"address" text,
-	"created_by" uuid,
-	"latitude" numeric,
-	"longitude" numeric,
+	"user_id" uuid,
+	"location_coordinates" "point",
 	"organization_id" uuid,
-	"privacy" integer,
-	"location_type" integer DEFAULT 0,
+	"privacy" boolean,
+	"location_type" text DEFAULT 'yard',
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "job" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"container_name" text,
 	"from_location_id" uuid NOT NULL,
 	"to_location_id" uuid NOT NULL,
 	"organization_id" uuid NOT NULL,
@@ -114,17 +113,40 @@ CREATE TABLE "job" (
 	"acceptance_to_delivery_time" integer,
 	"published_to_delivery_time" integer,
 	"load_type" integer DEFAULT 0,
+	"user_id" uuid NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "job_request" (
+CREATE TABLE "job_bid" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"job_id" uuid NOT NULL,
 	"transporter_id" uuid NOT NULL,
+	"vehicle_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
-	"job_request_status" integer NOT NULL,
-	"vehicle_id" uuid,
+	"status" text DEFAULT 'pending' NOT NULL,
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "job_bid_line_item" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"job_bid_id" uuid NOT NULL,
+	"job_id" uuid NOT NULL,
+	"job_consignment_id" uuid NOT NULL,
+	"vehicle_id" uuid NOT NULL,
+	"price" integer,
+	"user_id" uuid NOT NULL,
+	"created_at" timestamp NOT NULL,
+	"updated_at" timestamp NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "job_consignment" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"job_id" uuid NOT NULL,
+	"container_identifier" text NOT NULL,
+	"container_type" text NOT NULL,
+	"user_id" uuid NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
 );
@@ -150,7 +172,5 @@ ALTER TABLE "member" ADD CONSTRAINT "member_organization_id_organization_id_fk" 
 ALTER TABLE "member" ADD CONSTRAINT "member_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "partnership" ADD CONSTRAINT "partnership_source_organization_id_organization_id_fk" FOREIGN KEY ("source_organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "partnership" ADD CONSTRAINT "partnership_target_organization_id_organization_id_fk" FOREIGN KEY ("target_organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "job_request" ADD CONSTRAINT "job_request_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."job"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "job_request" ADD CONSTRAINT "job_request_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "vehicle" ADD CONSTRAINT "vehicle_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "vehicle" ADD CONSTRAINT "vehicle_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;

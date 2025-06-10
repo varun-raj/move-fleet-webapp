@@ -22,6 +22,9 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/config/queryClient";
+import { useCallback, useEffect, useState } from "react";
+import { RootData } from "@/zod/root.zod";
+import { getRootData } from "@/lib/apiHandlers/organization.apiHandler";
 
 type isActiveProps = {
   pathname: string;
@@ -38,7 +41,7 @@ interface SidebarItem {
 const sidebarItems: SidebarItem[] = [
   {
     label: "Dashboard",
-    href: "/ca/dashboard",
+    href: "/ca/[organizationSlug]/dashboard",
     icon: Home,
     isActive: ({ pathname, }) => {
       return pathname === "/ca/dashboard";
@@ -46,23 +49,23 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     label: "Jobs",
-    href: "/ca/jobs",
+    href: "/ca/[organizationSlug]/jobs",
     icon: Truck,
     isActive: ({ pathname }) => {
       return pathname === "/ca/jobs";
     }
   },
   {
-    label: "Yards",
-    href: "/ca/yards",
+    label: "Locations",
+    href: "/ca/[organizationSlug]/locations",
     icon: Building,
     isActive: ({ pathname }) => {
-      return pathname === "/ca/yards";
+      return pathname === "/ca/locations";
     }
   },
   {
     label: "Transport Partners",
-    href: "/ca/transporters",
+    href: "/ca/[organizationSlug]/transporters",
     icon: Users,
     isActive: ({ pathname }) => {
       return pathname === "/ca/transporters";
@@ -70,7 +73,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     label: "Settings",
-    href: "/ca/settings",
+    href: "/ca/[organizationSlug]/settings",
     icon: Settings,
     isActive: ({ pathname }) => {
       return pathname === "/ca/settings";
@@ -83,10 +86,47 @@ export function ClearingAgencyLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { pathname, query, asPath } = useRouter();
+  const router = useRouter();
+
+  const { pathname, query, asPath } = router;
+  const [rootData, setRootData] = useState<RootData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRootData = useCallback(async () => {
+    setIsLoading(true);
+    return getRootData(query.organizationSlug as string).then((data) => {
+      setRootData(data);
+      setIsLoading(false);
+    }).catch((error) => {
+      setError(error.message);
+      setIsLoading(false);
+    });
+  }, [query.organizationSlug]);
+
+  const pathMapper = useCallback((path: string) => {
+    return path.replace("[organizationSlug]", query.organizationSlug as string);
+  }, [query.organizationSlug]);
+
+  useEffect(() => {
+    if (query.organizationSlug) {
+      fetchRootData();
+    }
+  }, [query.organizationSlug]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!rootData) {
+    return <div>No root data</div>;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
-
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-muted/40 md:block">
           <div className="flex h-full max-h-screen flex-col gap-2">
@@ -105,7 +145,7 @@ export function ClearingAgencyLayout({
                 {sidebarItems.map((item) => (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={pathMapper(item.href)}
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
                       item.isActive({ pathname: pathname, query: query, asPath: asPath }) && "bg-primary text-primary-foreground"
