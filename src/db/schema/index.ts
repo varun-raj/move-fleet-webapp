@@ -1,7 +1,6 @@
-export * from "./auth";
-export * from "./organization";
-export * from "./location";
-export * from "./job";
-export * from "./vehicle";
-
-export * from "./relationships"
+export * from './auth';
+export * from './job';
+export * from './location';
+export * from './organization';
+export * from './relationships';
+export * from './vehicle';

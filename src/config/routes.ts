@@ -16,3 +16,12 @@ export const GET_LOCATION_PATH = (organizationSlug: string, locationId: string) 
 // Partnerships
 export const CREATE_PARTNERSHIP_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/create`;
 export const LIST_PARTNERSHIPS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/list`;
+
+export const HOME_PATH = "/";
+export const AUTH_PATH = "/auth";
+export const APP_DASHBOARD_PATH = "/dashboard";
+
+export const CREATE_VEHICLE_PATH = (organizationSlug: string) =>
+  `/api/manage/${organizationSlug}/vehicles/create`;
+export const LIST_VEHICLES_PATH = (organizationSlug: string) =>
+  `/api/manage/${organizationSlug}/vehicles/list`;

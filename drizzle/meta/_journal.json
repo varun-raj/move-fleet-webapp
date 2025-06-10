@@ -22,6 +22,20 @@
       "when": 1749533921159,
       "tag": "0002_misty_lyja",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749557840676,
+      "tag": "0003_special_sumo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749559108448,
+      "tag": "0004_blue_zombie",
+      "breakpoints": true
     }
   ]
 }
