@@ -6,6 +6,7 @@ export const GET_ROOT_DATA_PATH = (organizationSlug: string) => `/api/manage/${o
 export const CREATE_JOB_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/jobs/create`;
 export const GET_JOB_PATH = (organizationSlug: string, jobId: string) => `/api/manage/${organizationSlug}/jobs/${jobId}`;
 export const LIST_JOBS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/jobs/list`;
+export const FIND_JOBS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/jobs/find-jobs`;
 
 // Locations
 export const CREATE_LOCATION_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/locations/create`;

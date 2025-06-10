@@ -1,6 +1,6 @@
-import { Job, JobCreate, JobConsignment } from "@/db/schema";
+import { Job, JobCreate, JobConsignment, Location } from "@/db/schema";
 import API from "../utils/API";
-import { CREATE_JOB_PATH } from "@/config/routes";
+import { CREATE_JOB_PATH, FIND_JOBS_PATH } from "@/config/routes";
 import axios from "axios";
 
 type JobWithConsignments = Job & {
@@ -9,10 +9,14 @@ type JobWithConsignments = Job & {
   toLocationName: string | null;
 };
 
-type JobListType = {
-  job: Job;
-  fromLocationName: string | null;
-  toLocationName: string | null;
+export type JobListType = Job & {
+  fromLocation: Location;
+  toLocation: Location;
+}[];
+
+export type FindJobListItem = Job & {
+  fromLocation: Location;
+  toLocation: Location;
 };
 
 export const getJob = async (
@@ -32,6 +36,12 @@ export const listJobs = async (
     params: { organizationSlug },
   });
   return response.data;
+};
+
+export const findJobs = async (
+  organizationSlug: string
+): Promise<FindJobListItem[]> => {
+  return API.get(FIND_JOBS_PATH(organizationSlug)) as Promise<FindJobListItem[]>;
 };
 
 export const createJob = async (

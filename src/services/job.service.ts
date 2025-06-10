@@ -28,16 +28,20 @@ export class JobService {
         fromLocation: true,
         toLocation: true,
         organization: true,
+        jobConsignments: true,
       },
       columns: {
         id: true,
         dueDate: true,
         status: true,
         createdAt: true,
-
       }
     });
 
-    return jobs;
+    return jobs.map(job => ({
+      ...job,
+      jobConsignments: undefined,
+      consignmentCount: job.jobConsignments.length
+    }));
   }
 }
