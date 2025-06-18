@@ -56,6 +56,14 @@ const sidebarItems: SidebarItem[] = [
     }
   },
   {
+    label: "My Jobs",
+    href: "/t/[organizationSlug]/my-jobs",
+    icon: Package2,
+    isActive: ({ pathname }) => {
+      return pathname === "/t/my-jobs";
+    }
+  },
+  {
     label: "Vehicles",
     href: "/t/[organizationSlug]/vehicles",
     icon: Building,

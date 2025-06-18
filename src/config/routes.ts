@@ -29,3 +29,7 @@ export const CREATE_VEHICLE_PATH = (organizationSlug: string) =>
   `/api/manage/${organizationSlug}/vehicles/create`;
 export const LIST_VEHICLES_PATH = (organizationSlug: string) =>
   `/api/manage/${organizationSlug}/vehicles/list`;
+
+// Transporter Jobs
+export const LIST_TRANSPORTER_JOBS_PATH = (organizationSlug: string) =>
+  `/api/manage/${organizationSlug}/jobs/my-assigned-jobs`;

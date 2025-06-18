@@ -1,6 +1,6 @@
 import { Job, JobCreate, JobConsignment, Location } from "@/db/schema";
 import API from "../utils/API";
-import { CREATE_JOB_PATH, FIND_JOBS_PATH, LIST_JOBS_PATH, GET_JOB_BIDS_PATH, UPDATE_JOB_BID_PATH } from "@/config/routes";
+import { CREATE_JOB_PATH, FIND_JOBS_PATH, LIST_JOBS_PATH, GET_JOB_BIDS_PATH, UPDATE_JOB_BID_PATH, LIST_TRANSPORTER_JOBS_PATH } from "@/config/routes";
 import axios from "axios";
 
 type JobWithConsignments = Job & {
@@ -40,6 +40,14 @@ export type Bid = {
     name: string;
   };
   bidLineItems: BidLineItem[];
+};
+
+export type TransporterJob = Job & {
+  fromLocationName: string | null;
+  toLocationName: string | null;
+  jobConsignments: (JobConsignment & {
+    containerType: '20ft' | '40ft';
+  })[];
 };
 
 export const getJob = async (
@@ -85,4 +93,10 @@ export const updateBidStatus = async (
   data: { status: "accepted" | "rejected"; consignmentId?: string }
 ): Promise<void> => {
   return API.patch(UPDATE_JOB_BID_PATH(organizationSlug, jobId, bidId), data) as Promise<void>;
+};
+
+export const listTransporterJobs = async (
+  organizationSlug: string
+): Promise<TransporterJob[]> => {
+  return API.get(LIST_TRANSPORTER_JOBS_PATH(organizationSlug)) as Promise<TransporterJob[]>;
 };    

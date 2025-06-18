@@ -79,4 +79,27 @@ export class JobService {
     });
     return bids;
   }
+
+  static async getTransporterJobs(transporterId: string) {
+    const jobs = await db.query.jobConsignment.findMany({
+      where: and(
+        eq(jobConsignment.transporterId, transporterId),
+        eq(jobConsignment.status, 'bidding_accepted')
+      ),
+      with: {
+        job: {
+          with: {
+            fromLocation: true,
+            toLocation: true,
+          },
+        },
+      },
+    });
+
+    return jobs.map(job => ({
+      ...job,
+      fromLocationName: job.job.fromLocation?.name || null,
+      toLocationName: job.job.toLocation?.name || null,
+    }));
+  }
 }
