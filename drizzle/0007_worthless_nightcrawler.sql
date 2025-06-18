@@ -1,0 +1,1 @@
+ALTER TABLE "job_bid_line_item" ADD COLUMN "status" text DEFAULT 'pending' NOT NULL;

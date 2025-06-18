@@ -19,16 +19,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { getBidsForJob, getJob, updateBidStatus, type Bid } from "@/lib/apiHandlers/job.apiHandler";
+import { getBidsForJob, getJob, updateBidItems, type Bid, type UpdateBidItemsRequest } from "@/lib/apiHandlers/job.apiHandler";
 import ApproveBidDialog from "@/components/dashboard/jobs/ApproveBidDialog";
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: "bg-gray-200 text-gray-800",
+  accepted: "bg-green-200 text-green-800",
+  rejected: "bg-red-200 text-red-800",
+  bidding_accepted: "bg-green-100 text-green-700",
+  bidding_rejected: "bg-red-100 text-red-700",
+};
 
 export default function JobBidsPage() {
   const router = useRouter();
   const { organizationSlug, jobId } = router.query;
   const queryClient = useQueryClient();
-  const [selectedBid, setSelectedBid] = React.useState<{ bidId: string; vehicleId: string } | null>(null);
+  const [selectedBid, setSelectedBid] = React.useState<Bid | null>(null);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const { data: bids = [], isLoading, error } = useQuery<Bid[]>({
     queryKey: ["job-bids", jobId],
@@ -39,45 +47,33 @@ export default function JobBidsPage() {
   const { data: jobData } = useQuery({
     queryKey: ["job", jobId],
     queryFn: () => getJob(jobId as string, organizationSlug as string),
-    enabled: !!organizationSlug && !!jobId && !!selectedBid,
+    enabled: !!organizationSlug && !!jobId,
   });
 
-  const updateBidStatusMutation = useMutation({
-    mutationFn: ({ bidId, status, consignmentId }: { bidId: string; status: "accepted" | "rejected"; consignmentId?: string }) =>
-      updateBidStatus(jobId as string, bidId, organizationSlug as string, { status, consignmentId }),
-    onSuccess: (_, variables) => {
-      toast.success(`Bid ${variables.status} successfully.`);
+  const updateBidItemsMutation = useMutation({
+    mutationFn: ({ bidId, updates }: { bidId: string; updates: UpdateBidItemsRequest["updates"] }) =>
+      updateBidItems(jobId as string, bidId, organizationSlug as string, { updates }),
+    onSuccess: () => {
+      toast.success(`Bid items updated successfully.`);
       queryClient.invalidateQueries({ queryKey: ["job-bids", jobId] });
+      setDialogOpen(false);
       setSelectedBid(null);
     },
-    onError: (error: import("axios").AxiosError<{ message: string }>, variables) => {
-      toast.error(`Failed to ${variables.status} bid. ${error.response?.data?.message || ""}`);
+    onError: (error: import("axios").AxiosError<{ message: string }>) => {
+      toast.error(`Failed to update bid items. ${error.response?.data?.message || ""}`);
     },
   });
 
-  const handleAcceptBid = (bidId: string, vehicleId: string) => {
-    setSelectedBid({ bidId, vehicleId });
+  const handleOpenBidDialog = (bid: Bid) => {
+    setSelectedBid(bid);
+    setDialogOpen(true);
   };
 
-  const handleApproveBid = (bidId: string, consignmentId: string) => {
-    updateBidStatusMutation.mutate({
-      bidId,
-      status: "accepted",
-      consignmentId
-    });
+  const handleBulkUpdate = (updates: UpdateBidItemsRequest["updates"]) => {
+    if (selectedBid) {
+      updateBidItemsMutation.mutate({ bidId: selectedBid.id, updates });
+    }
   };
-
-  const flattenedBids = React.useMemo(() => {
-    return bids.flatMap((bid) =>
-      bid.bidLineItems.map((item) => ({
-        ...item,
-        bidId: bid.id,
-        bidStatus: bid.status,
-        bidCreatedAt: bid.createdAt,
-        transporterName: bid.transporter.name,
-      }))
-    );
-  }, [bids]);
 
   if (isLoading) {
     return (
@@ -106,49 +102,35 @@ export default function JobBidsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Transporter</TableHead>
-                <TableHead>Vehicle Registration</TableHead>
-                <TableHead>Vehicle Floor Size</TableHead>
                 <TableHead>Bid Time</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {flattenedBids.length > 0 ? (
-                flattenedBids.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.transporterName}</TableCell>
-                    <TableCell>{item.vehicle.registrationNumber}</TableCell>
-                    <TableCell>{item.vehicle.floorSize}</TableCell>
+              {bids.length > 0 ? (
+                bids.map((bid) => (
+                  <TableRow key={bid.id}>
+                    <TableCell>{bid.transporter.name}</TableCell>
+                    <TableCell>{new Date(bid.createdAt).toLocaleString()}</TableCell>
                     <TableCell>
-                      {new Date(item.bidCreatedAt).toLocaleString()}
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLORS[bid.status] || "bg-gray-100 text-gray-700"}`}>{bid.status}</span>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={item.bidStatus === 'pending' ? 'secondary' : item.bidStatus === 'accepted' ? 'default' : 'destructive'}>{item.bidStatus}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
+                    <TableCell className="text-right">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleAcceptBid(item.bidId, item.vehicle.id)}
-                        disabled={item.bidStatus !== 'pending' || updateBidStatusMutation.isPending}
+                        onClick={() => handleOpenBidDialog(bid)}
+                        disabled={bid.status !== "pending"}
                       >
-                        Approve
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => updateBidStatusMutation.mutate({ bidId: item.bidId, status: "rejected" })}
-                        disabled={item.bidStatus !== 'pending' || updateBidStatusMutation.isPending}
-                      >
-                        Reject
+                        Review Items
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-24">
+                  <TableCell colSpan={4} className="text-center h-24">
                     No bids received yet.
                   </TableCell>
                 </TableRow>
@@ -158,14 +140,16 @@ export default function JobBidsPage() {
         </CardContent>
       </Card>
 
-      <ApproveBidDialog
-        isOpen={!!selectedBid}
-        onClose={() => setSelectedBid(null)}
-        bid={selectedBid}
-        jobConsignments={jobData?.jobConsignments || []}
-        onApprove={handleApproveBid}
-        isSubmitting={updateBidStatusMutation.isPending}
-      />
+      {selectedBid && (
+        <ApproveBidDialog
+          isOpen={dialogOpen}
+          onClose={() => { setDialogOpen(false); setSelectedBid(null); }}
+          bid={selectedBid}
+          jobConsignments={jobData?.jobConsignments || []}
+          onBulkUpdate={handleBulkUpdate}
+          isSubmitting={updateBidItemsMutation.isPending}
+        />
+      )}
     </div>
   );
 } 

@@ -1,12 +1,14 @@
-import { db } from "@/db";
-import { jobBid } from "@/db/schema";
 import { apiCheckMembership } from "@/lib/apiMiddleware/checkMembership.apiMiddleware";
-import { eq } from "drizzle-orm";
+import { BidService } from "@/services/bid.service";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
-const updateBidStatusSchema = z.object({
-  status: z.enum(["accepted", "rejected"]),
+const updateBidItemsSchema = z.object({
+  updates: z.array(z.object({
+    bidLineItemId: z.string(),
+    consignmentId: z.string(),
+    status: z.enum(["accepted", "rejected"]),
+  })),
 });
 
 export default async function handler(
@@ -30,20 +32,16 @@ export default async function handler(
       }
 
       try {
-        const parsedBody = updateBidStatusSchema.safeParse(req.body);
+        const parsedBody = updateBidItemsSchema.safeParse(req.body);
 
         if (!parsedBody.success) {
           return res.status(400).json({ error: "Invalid request body", details: parsedBody.error.issues });
         }
 
-        const { status } = parsedBody.data;
+        const { updates } = parsedBody.data;
 
-        await db
-          .update(jobBid)
-          .set({ status })
-          .where(eq(jobBid.id, bidId));
-
-        return res.status(200).json({ message: `Bid ${status} successfully` });
+        const result = await BidService.updateBidItems(bidId, updates);
+        return res.status(200).json(result);
       } catch (error) {
         console.error(`Failed to update bid ${bidId}:`, error);
         return res.status(500).json({ error: "Internal Server Error" });

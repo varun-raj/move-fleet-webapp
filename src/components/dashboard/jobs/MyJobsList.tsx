@@ -31,7 +31,7 @@ export default function MyJobsList() {
         <MyJobItem key={job.id} job={job} />
       ))}
 
-      {jobs?.length === 0 && (
+      {(!jobs || jobs.length === 0) && (
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">

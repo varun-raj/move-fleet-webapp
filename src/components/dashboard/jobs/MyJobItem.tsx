@@ -55,7 +55,7 @@ export default function MyJobItem({ job }: MyJobItemProps) {
               Consignments
             </p>
             <div className="grid gap-2">
-              {job.jobConsignments.map((consignment) => (
+              {(job.jobConsignments || []).map((consignment) => (
                 <div
                   key={consignment.id}
                   className="flex justify-between items-center p-2 bg-muted rounded-md"

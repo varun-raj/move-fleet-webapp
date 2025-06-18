@@ -73,6 +73,18 @@ export class JobService {
                 floorSize: true,
               },
             },
+            jobConsignment: {
+              columns: {
+                id: true,
+                containerIdentifier: true,
+                containerType: true,
+                status: true,
+              },
+            },
+          },
+          columns: {
+            id: true,
+            status: true,
           },
         },
       },
@@ -91,15 +103,28 @@ export class JobService {
           with: {
             fromLocation: true,
             toLocation: true,
+            jobConsignments: {
+              where: eq(jobConsignment.transporterId, transporterId),
+            },
           },
         },
       },
     });
 
-    return jobs.map(job => ({
-      ...job,
-      fromLocationName: job.job.fromLocation?.name || null,
-      toLocationName: job.job.toLocation?.name || null,
-    }));
+    // Group consignments by job
+    const jobsMap = new Map();
+    jobs.forEach(consignment => {
+      if (!jobsMap.has(consignment.job.id)) {
+        jobsMap.set(consignment.job.id, {
+          ...consignment.job,
+          fromLocationName: consignment.job.fromLocation?.name || null,
+          toLocationName: consignment.job.toLocation?.name || null,
+          jobConsignments: [],
+        });
+      }
+      jobsMap.get(consignment.job.id).jobConsignments.push(consignment);
+    });
+
+    return Array.from(jobsMap.values());
   }
 }

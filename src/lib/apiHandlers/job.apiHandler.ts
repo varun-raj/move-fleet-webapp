@@ -25,10 +25,17 @@ export type FindJobListItem = Job & {
 
 export type BidLineItem = {
   id: string;
+  status: "pending" | "accepted" | "rejected";
   vehicle: {
     id: string;
     registrationNumber: string;
     floorSize: string;
+  };
+  jobConsignment: {
+    id: string;
+    containerIdentifier: string;
+    containerType: string;
+    status: string;
   };
 };
 
@@ -79,12 +86,8 @@ export const createJob = async (
   return API.post(CREATE_JOB_PATH(organizationSlug), job) as Promise<Job>;
 };
 
-export const getBidsForJob = async (
-  jobId: string,
-  organizationSlug: string
-): Promise<Bid[]> => {
-  return API.get(GET_JOB_BIDS_PATH(organizationSlug, jobId)) as Promise<Bid[]>;
-};
+export const getBidsForJob = (jobId: string, organizationSlug: string) =>
+  API.get(GET_JOB_BIDS_PATH(organizationSlug, jobId)) as Promise<Bid[]>;
 
 export const updateBidStatus = async (
   jobId: string,
@@ -99,4 +102,15 @@ export const listTransporterJobs = async (
   organizationSlug: string
 ): Promise<TransporterJob[]> => {
   return API.get(LIST_TRANSPORTER_JOBS_PATH(organizationSlug)) as Promise<TransporterJob[]>;
-};    
+};
+
+export type UpdateBidItemsRequest = {
+  updates: Array<{
+    bidLineItemId: string;
+    consignmentId: string;
+    status: "accepted" | "rejected";
+  }>;
+};
+
+export const updateBidItems = (jobId: string, bidId: string, organizationSlug: string, data: UpdateBidItemsRequest) =>
+  API.patch(UPDATE_JOB_BID_PATH(organizationSlug, jobId, bidId), data) as Promise<Bid>;    

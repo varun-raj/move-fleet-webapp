@@ -65,6 +65,7 @@ export const jobBidLineItem = pgTable("job_bid_line_item", {
   transporterId: uuid('transporter_id').notNull(),
   price: integer('price'),
   userId: uuid('user_id').notNull(),
+  status: text('status', { enum: ['pending', 'accepted', 'rejected'] }).default('pending').notNull(),
   createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
   updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull()
 });
