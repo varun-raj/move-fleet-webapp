@@ -8,6 +8,10 @@ export const GET_JOB_PATH = (organizationSlug: string, jobId: string) => `/api/m
 export const LIST_JOBS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/jobs/list`;
 export const FIND_JOBS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/jobs/find-jobs`;
 
+// Job Bids
+export const GET_JOB_BIDS_PATH = (organizationSlug: string, jobId: string) => `/api/manage/${organizationSlug}/jobs/${jobId}/bids`;
+export const UPDATE_JOB_BID_PATH = (organizationSlug: string, jobId: string, bidId: string) => `/api/manage/${organizationSlug}/jobs/${jobId}/bids/${bidId}`;
+
 // Locations
 export const CREATE_LOCATION_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/locations/create`;
 export const LIST_LOCATIONS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/locations/list`;

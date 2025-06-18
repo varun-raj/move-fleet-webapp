@@ -19,55 +19,53 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import API from "@/lib/utils/API";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-
-type BidLineItem = {
-  id: string;
-  vehicle: {
-    id: string;
-    registrationNumber: string;
-    floorSize: string;
-  };
-};
-
-type Bid = {
-  id: string;
-  status: string;
-  createdAt: string;
-  transporter: {
-    name: string;
-  };
-  bidLineItems: BidLineItem[];
-};
-
-const fetchBids = async (organizationSlug: string, jobId: string): Promise<Bid[]> => {
-  return API.get(`/api/manage/${organizationSlug}/jobs/${jobId}/bids`) as Promise<Bid[]>;
-};
+import { getBidsForJob, getJob, updateBidStatus, type Bid } from "@/lib/apiHandlers/job.apiHandler";
+import ApproveBidDialog from "@/components/dashboard/jobs/ApproveBidDialog";
 
 export default function JobBidsPage() {
   const router = useRouter();
   const { organizationSlug, jobId } = router.query;
   const queryClient = useQueryClient();
+  const [selectedBid, setSelectedBid] = React.useState<{ bidId: string; vehicleId: string } | null>(null);
 
   const { data: bids = [], isLoading, error } = useQuery<Bid[]>({
     queryKey: ["job-bids", jobId],
-    queryFn: () => fetchBids(organizationSlug as string, jobId as string),
+    queryFn: () => getBidsForJob(jobId as string, organizationSlug as string),
     enabled: !!organizationSlug && !!jobId,
   });
 
+  const { data: jobData } = useQuery({
+    queryKey: ["job", jobId],
+    queryFn: () => getJob(jobId as string, organizationSlug as string),
+    enabled: !!organizationSlug && !!jobId && !!selectedBid,
+  });
+
   const updateBidStatusMutation = useMutation({
-    mutationFn: ({ bidId, status }: { bidId: string; status: "accepted" | "rejected" }) =>
-      API.patch(`/api/manage/${organizationSlug}/jobs/${jobId}/bids/${bidId}`, { status }),
+    mutationFn: ({ bidId, status, consignmentId }: { bidId: string; status: "accepted" | "rejected"; consignmentId?: string }) =>
+      updateBidStatus(jobId as string, bidId, organizationSlug as string, { status, consignmentId }),
     onSuccess: (_, variables) => {
       toast.success(`Bid ${variables.status} successfully.`);
       queryClient.invalidateQueries({ queryKey: ["job-bids", jobId] });
+      setSelectedBid(null);
     },
     onError: (error: import("axios").AxiosError<{ message: string }>, variables) => {
       toast.error(`Failed to ${variables.status} bid. ${error.response?.data?.message || ""}`);
     },
   });
+
+  const handleAcceptBid = (bidId: string, vehicleId: string) => {
+    setSelectedBid({ bidId, vehicleId });
+  };
+
+  const handleApproveBid = (bidId: string, consignmentId: string) => {
+    updateBidStatusMutation.mutate({
+      bidId,
+      status: "accepted",
+      consignmentId
+    });
+  };
 
   const flattenedBids = React.useMemo(() => {
     return bids.flatMap((bid) =>
@@ -132,7 +130,7 @@ export default function JobBidsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => updateBidStatusMutation.mutate({ bidId: item.bidId, status: "accepted" })}
+                        onClick={() => handleAcceptBid(item.bidId, item.vehicle.id)}
                         disabled={item.bidStatus !== 'pending' || updateBidStatusMutation.isPending}
                       >
                         Approve
@@ -159,6 +157,15 @@ export default function JobBidsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <ApproveBidDialog
+        isOpen={!!selectedBid}
+        onClose={() => setSelectedBid(null)}
+        bid={selectedBid}
+        jobConsignments={jobData?.jobConsignments || []}
+        onApprove={handleApproveBid}
+        isSubmitting={updateBidStatusMutation.isPending}
+      />
     </div>
   );
 } 

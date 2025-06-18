@@ -30,3 +30,6 @@ alwaysApply: false
   - When there is a long list use infinite query 
 2. The form data for submission should be stored in `formData` state and used upon submission.
 3. Form should have `submitting` flag to show the submission loader and disable the submit button when the flag is true.
+4. No API should be called from the UI Compoentns. Instead they should be wrriten under `src/lib/apiHandlers`
+5. The pasth are defined under [routes.ts](mdc:src/config/routes.ts) and used inside the apiHandlers.
+
