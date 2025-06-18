@@ -104,6 +104,10 @@ export const jobBidRelations = relations(jobBid, ({ one, many, }) => ({
     fields: [jobBid.jobId],
     references: [job.id]
   }),
+  transporter: one(organization, {
+    fields: [jobBid.transporterId],
+    references: [organization.id],
+  }),
   user: one(user, {
     fields: [jobBid.userId],
     references: [user.id]

@@ -1,4 +1,4 @@
-import { job, Job, JobConsignment, jobConsignment } from "@/db/schema";
+import { job, Job, JobConsignment, jobConsignment, jobBid } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { db } from "@/db";
 
@@ -53,5 +53,30 @@ export class JobService {
       twentyFtConsignments: job.jobConsignments.filter(consignment => consignment.containerType === '20ft').length,
       fortyFtConsignments: job.jobConsignments.filter(consignment => consignment.containerType === '40ft').length,
     }));
+  }
+
+  static async getBidsForJob(jobId: string) {
+    const bids = await db.query.jobBid.findMany({
+      where: eq(jobBid.jobId, jobId),
+      with: {
+        transporter: {
+          columns: {
+            name: true,
+          },
+        },
+        bidLineItems: {
+          with: {
+            vehicle: {
+              columns: {
+                id: true,
+                registrationNumber: true,
+                floorSize: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return bids;
   }
 }

@@ -4,7 +4,6 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { listJobs } from "@/lib/apiHandlers/job.apiHandler";
-import { Job } from "@/db/schema";
 import {
   Table,
   TableBody,
@@ -23,18 +22,13 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-
-type JobList = {
-  job: Job;
-  fromLocationName: string | null;
-  toLocationName: string | null;
-};
+import { JobListType } from "@/lib/apiHandlers/job.apiHandler";
 
 export default function ListJobs() {
   const router = useRouter();
   const { organizationSlug } = router.query;
 
-  const { data: jobs, isLoading } = useQuery<JobList[]>({
+  const { data: jobs, isLoading } = useQuery<JobListType[]>({
     queryKey: ["jobs", organizationSlug],
     queryFn: () => listJobs(organizationSlug as string),
     enabled: !!organizationSlug,
@@ -76,11 +70,12 @@ export default function ListJobs() {
               <TableHead>To</TableHead>
               <TableHead>Due Date</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {jobs && jobs.length > 0 ? (
-              jobs.map(({ job, fromLocationName, toLocationName }) => (
+              jobs.map(({ fromLocationName, toLocationName, job }) => (
                 <TableRow key={job.id}>
                   <TableCell>
                     <Link
@@ -96,11 +91,18 @@ export default function ListJobs() {
                     {job.dueDate ? new Date(job.dueDate).toLocaleDateString() : "-"}
                   </TableCell>
                   <TableCell>{job.status}</TableCell>
+                  <TableCell className="text-right">
+                    <Link href={`/ca/${organizationSlug}/jobs/${job.id}/bids`}>
+                      <Button variant="outline" size="sm">
+                        View Bids
+                      </Button>
+                    </Link>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">
+                <TableCell colSpan={6} className="text-center">
                   No jobs found.
                 </TableCell>
               </TableRow>

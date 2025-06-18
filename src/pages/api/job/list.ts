@@ -45,6 +45,7 @@ export default async function handler(
         const fromLocation = alias(location, "fromLocation");
         const toLocation = alias(location, "toLocation");
 
+
         const jobsFromDB = await db
           .select({
             job: job,
