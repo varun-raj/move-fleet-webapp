@@ -15,22 +15,11 @@ export default function MyJobItem({ job }: MyJobItemProps) {
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>Job #{job.id.slice(0, 8)}</CardTitle>
+            <CardTitle>Job #{job.id}</CardTitle>
             <CardDescription>
               {job.fromLocationName} → {job.toLocationName}
             </CardDescription>
           </div>
-          <Badge
-            variant={
-              job.status === "active"
-                ? "default"
-                : job.status === "closed"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {job.status}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -61,7 +50,9 @@ export default function MyJobItem({ job }: MyJobItemProps) {
                   className="flex justify-between items-center p-2 bg-muted rounded-md"
                 >
                   <span>{consignment.containerIdentifier}</span>
+                  <Badge variant="outline">{consignment.vehicle?.registrationNumber}</Badge>
                   <Badge variant="outline">{consignment.containerType}</Badge>
+                  <Badge variant="outline">{consignment.status}</Badge>
                 </div>
               ))}
             </div>

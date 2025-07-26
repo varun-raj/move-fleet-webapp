@@ -11,17 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getBidsForJob, getJob, updateBidItems, type Bid, type UpdateBidItemsRequest } from "@/lib/apiHandlers/job.apiHandler";
 import ApproveBidDialog from "@/components/dashboard/jobs/ApproveBidDialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "bg-gray-200 text-gray-800",
@@ -31,7 +26,7 @@ const STATUS_COLORS: Record<string, string> = {
   bidding_rejected: "bg-red-100 text-red-700",
 };
 
-export default function JobBidsPage() {
+export default function JobBids() {
   const router = useRouter();
   const { organizationSlug, jobId } = router.query;
   const queryClient = useQueryClient();
@@ -88,68 +83,67 @@ export default function JobBidsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Incoming Bids</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Bids for Job #{jobId}</CardTitle>
-          <CardDescription>
-            Review and manage incoming bids from transporters.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Transporter</TableHead>
-                <TableHead>Bid Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bids.length > 0 ? (
-                bids.map((bid) => (
-                  <TableRow key={bid.id}>
-                    <TableCell>{bid.transporter.name}</TableCell>
-                    <TableCell>{new Date(bid.createdAt).toLocaleString()}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLORS[bid.status] || "bg-gray-100 text-gray-700"}`}>{bid.status}</span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenBidDialog(bid)}
-                        disabled={bid.status !== "pending"}
-                      >
-                        Review Items
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24">
-                    No bids received yet.
+    <Card>
+      <CardHeader>
+        <CardTitle>Bids for Job #{jobId}</CardTitle>
+        <CardDescription>
+          Review and manage incoming bids from transporters.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Transporter</TableHead>
+              <TableHead>Bid Time</TableHead>
+              <TableHead>Items</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {bids.length > 0 ? (
+              bids.map((bid) => (
+                <TableRow key={bid.id}>
+                  <TableCell>{bid.transporter.name}</TableCell>
+                  <TableCell>{new Date(bid.createdAt).toLocaleString()}</TableCell>
+                  <TableCell>{bid.bidLineItems.length}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLORS[bid.status] || "bg-gray-100 text-gray-700"}`}>{bid.status}</span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenBidDialog(bid)}
+                      disabled={bid.status !== "pending"}
+                    >
+                      Review Items
+                    </Button>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center h-24">
+                  No bids received yet.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
 
-      {selectedBid && (
-        <ApproveBidDialog
-          isOpen={dialogOpen}
-          onClose={() => { setDialogOpen(false); setSelectedBid(null); }}
-          bid={selectedBid}
-          jobConsignments={jobData?.jobConsignments || []}
-          onBulkUpdate={handleBulkUpdate}
-          isSubmitting={updateBidItemsMutation.isPending}
-        />
-      )}
-    </div>
+        {selectedBid && (
+          <ApproveBidDialog
+            isOpen={dialogOpen}
+            onClose={() => { setDialogOpen(false); setSelectedBid(null); }}
+            bid={selectedBid}
+            jobConsignments={jobData?.jobConsignments || []}
+            onBulkUpdate={handleBulkUpdate}
+            isSubmitting={updateBidItemsMutation.isPending}
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 } 

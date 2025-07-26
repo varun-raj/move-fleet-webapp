@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import JobBids from "./JobBids";
 
 type JobDetailsType = Job & {
   jobConsignments: JobConsignment[];
@@ -112,6 +113,8 @@ export default function JobDetails() {
           </Table>
         </CardContent>
       </Card>
+
+      <JobBids />
     </div>
   );
 } 

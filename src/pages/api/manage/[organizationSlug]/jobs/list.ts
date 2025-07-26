@@ -1,7 +1,7 @@
 import { apiAuthWrapper } from "@/lib/apiMiddleware/checkAuth.apiMiddleware";
 import { db } from "@/db";
-import { and, eq } from "drizzle-orm";
-import { job, location, member, organization } from "@/db/schema";
+import { and, eq, count, desc } from "drizzle-orm";
+import { job, location, member, organization, jobBid } from "@/db/schema";
 import { NextApiRequest, NextApiResponse } from "next";
 import { alias } from "drizzle-orm/pg-core";
 
@@ -48,12 +48,15 @@ export default async function handler(
             job: job,
             fromLocationName: fromLocation.name,
             toLocationName: toLocation.name,
+            bidCount: count(jobBid.id),
           })
           .from(job)
           .leftJoin(fromLocation, eq(job.fromLocationId, fromLocation.id))
           .leftJoin(toLocation, eq(job.toLocationId, toLocation.id))
+          .leftJoin(jobBid, eq(job.id, jobBid.jobId))
           .where(eq(job.organizationId, orgId))
-
+          .groupBy(job.id, fromLocation.name, toLocation.name)
+          .orderBy(desc(job.createdAt));
         res.status(200).json(jobsFromDB);
       } catch (error) {
         console.error(error);

@@ -103,6 +103,7 @@ export class JobService {
         eq(jobConsignment.status, 'bidding_accepted')
       ),
       with: {
+        vehicle: true,
         job: {
           with: {
             fromLocation: true,

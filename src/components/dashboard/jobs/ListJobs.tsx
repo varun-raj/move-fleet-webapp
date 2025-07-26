@@ -69,13 +69,14 @@ export default function ListJobs() {
               <TableHead>From</TableHead>
               <TableHead>To</TableHead>
               <TableHead>Due Date</TableHead>
+              <TableHead>Bids</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {jobs && jobs.length > 0 ? (
-              jobs.map(({ fromLocationName, toLocationName, job }) => (
+              jobs.map(({ fromLocationName, toLocationName, job, bidCount }) => (
                 <TableRow key={job.id}>
                   <TableCell>
                     <Link
@@ -90,11 +91,12 @@ export default function ListJobs() {
                   <TableCell>
                     {job.dueDate ? new Date(job.dueDate).toLocaleDateString() : "-"}
                   </TableCell>
+                  <TableCell>{bidCount}</TableCell>
                   <TableCell>{job.status}</TableCell>
                   <TableCell className="text-right">
-                    <Link href={`/ca/${organizationSlug}/jobs/${job.id}/bids`}>
+                    <Link href={`/ca/${organizationSlug}/jobs/${job.id}`}>
                       <Button variant="outline" size="sm">
-                        View Bids
+                        View Job
                       </Button>
                     </Link>
                   </TableCell>
