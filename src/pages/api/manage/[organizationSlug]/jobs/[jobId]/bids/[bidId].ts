@@ -1,5 +1,7 @@
 import { apiCheckMembership } from "@/lib/apiMiddleware/checkMembership.apiMiddleware";
 import { BidService } from "@/services/bid.service";
+import { JobService } from "@/services/job.service";
+import { VehicleService } from "@/services/vehicle.service";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
@@ -21,6 +23,12 @@ export default async function handler(
     allowedRoles: ["admin", "owner", "member"],
     allowedOrganizations: ["clearing_agency"],
     next: async (req, res) => {
+      const { jobId } = req.query;
+
+      if (typeof jobId !== "string") {
+        return res.status(400).json({ error: "Job ID is required" });
+      }
+
       if (req.method !== "PATCH") {
         return res.status(405).json({ error: "Method Not Allowed" });
       }
@@ -41,6 +49,17 @@ export default async function handler(
         const { updates } = parsedBody.data;
 
         const result = await BidService.updateBidItems(bidId, updates);
+
+        // Approved Vehicles
+        const approvedVehicles = result.bidLineItems.filter(update => update.status === 'accepted').map(update => update.vehicleId);
+        await Promise.all(approvedVehicles.map(vehicleId => VehicleService.updateVehicle(vehicleId, { status: 'in_job' })));
+
+        const countOfOpenItems = await JobService.getOpenJobItems(jobId);
+
+        if (countOfOpenItems.length === 0) {
+          await JobService.updateJobStatus(jobId, 'closed');
+        }
+
         return res.status(200).json(result);
       } catch (error) {
         console.error(`Failed to update bid ${bidId}:`, error);

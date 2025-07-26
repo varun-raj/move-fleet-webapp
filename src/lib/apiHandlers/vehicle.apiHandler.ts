@@ -16,7 +16,8 @@ export const createVehicle = async (
 };
 
 export const listVehicles = async (
-  organizationSlug: string
+  organizationSlug: string,
+  filters: { status?: string } = { status: undefined }
 ): Promise<Vehicle[]> => {
-  return API.get(LIST_VEHICLES_PATH(organizationSlug)) as Promise<Vehicle[]>;
+  return API.get(LIST_VEHICLES_PATH(organizationSlug), { params: filters }) as Promise<Vehicle[]>;
 }; 

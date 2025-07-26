@@ -6,7 +6,7 @@ export const job = pgTable("job", {
   toLocationId: uuid('to_location_id').notNull(),
   organizationId: uuid('organization_id').notNull(),
   dueDate: timestamp('due_date'),
-  status: text('job_status', { enum: ['active', 'inactive', 'closed', 'cancelled'] }).default('active').notNull(),
+  status: text('job_status', { enum: ['active', 'inactive', 'closed', 'cancelled', 'completed'] }).default('active').notNull(),
   transporterId: uuid('transporter_id'),
   vehicleId: uuid('vehicle_id'),
   publishedAt: timestamp('published_at'),

@@ -17,7 +17,12 @@ async function handler(
   const { organization } = session;
 
   if (req.method === "GET") {
+    const { status } = req.query;
     try {
+      if (status === 'available') {
+        const vehicles = await VehicleService.getAvailableVehicles(organization.id);
+        return res.status(200).json(vehicles);
+      }
       const vehicles = await VehicleService.getVehiclesByOrg(organization.id);
       return res.status(200).json(vehicles);
     } catch (error) {

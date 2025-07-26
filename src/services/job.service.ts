@@ -1,5 +1,5 @@
 import { job, Job, JobConsignment, jobConsignment, jobBid } from "@/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, ne } from "drizzle-orm";
 import { db } from "@/db";
 
 export class JobService {
@@ -11,6 +11,10 @@ export class JobService {
   static async getJobConsignments(jobId: string): Promise<JobConsignment[]> {
     const jobConsignments = await db.select().from(jobConsignment).where(eq(jobConsignment.jobId, jobId));
     return jobConsignments;
+  }
+
+  static async updateJobStatus(jobId: string, status: Job['status']) {
+    await db.update(job).set({ status }).where(eq(job.id, jobId));
   }
 
   static async getBiddableJobs(partnerIds: string[], transporterId: string) {
@@ -127,4 +131,15 @@ export class JobService {
 
     return Array.from(jobsMap.values());
   }
+
+  static async getOpenJobItems(jobId: string) {
+    const jobItems = await db.query.jobConsignment.findMany({
+      where: and(
+        eq(jobConsignment.jobId, jobId),
+        ne(jobConsignment.status, 'bidding_accepted')
+      ),
+    });
+    return jobItems;
+  }
+
 }

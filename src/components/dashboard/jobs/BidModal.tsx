@@ -43,7 +43,7 @@ export default function BidModal({
     Vehicle[]
   >({
     queryKey: ["vehicles", organizationSlug],
-    queryFn: () => listVehicles(organizationSlug),
+    queryFn: () => listVehicles(organizationSlug, { status: 'available' }),
     enabled: !!organizationSlug && isOpen,
   });
 
