@@ -44,7 +44,7 @@ export function SignUpForm() {
       } else {
         toast.success("Welcome! Please check your email to verify your account.")
         // Depending on your auth setup, you might redirect to sign-in or a pending verification page
-        router.push("/dashboard")
+        router.push("/")
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.")

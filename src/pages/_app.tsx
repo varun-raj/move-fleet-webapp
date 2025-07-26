@@ -4,10 +4,10 @@ import type { NextPage } from "next";
 import { Toaster } from "@/components/ui/sonner"
 import { useMemo } from "react";
 import { useRouter } from "next/router";
-import { AuthLayout } from "@/components/layouts/auth-layout";
+import { AuthLayout } from "@/components/layouts/AuthLayout";
 import { ClearingAgencyLayout } from "@/components/layouts/ClearingAgencyLayout";
 import { TransporterLayout } from "@/components/layouts/TransporterLayout";
-import PrivateLayout from "@/components/layouts/private-layout";
+import PrivateLayout from "@/components/layouts/PrivateLayout";
 
 
 interface IAppProps extends AppProps {

@@ -16,8 +16,8 @@ export default async function handler(
       try {
         const { organization } = session;
 
-        const partners = await OrganizationService.getPartners(organization.id);
-        res.status(200).json(partners);
+        const nonPartners = await OrganizationService.getNonPartners(organization.id);
+        res.status(200).json(nonPartners);
       } catch (error) {
         console.error(error);
         res.status(500).json({

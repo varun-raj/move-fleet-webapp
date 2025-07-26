@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { location, member, organization, partnership } from "@/db/schema";
 import { dateToISOString } from "@/lib/utils/data.helpers";
-import { and, eq, or } from "drizzle-orm";
+import { and, eq, notInArray, or } from "drizzle-orm";
 
 export class OrganizationService {
   static async getOrgBySlug(slug: string) {
@@ -62,5 +62,13 @@ export class OrganizationService {
         targetOrganization: true,
       },
     })
+  }
+
+  static async getNonPartners(organizationId: string) {
+    const partners = await this.getPartners(organizationId);
+    const partnerIds = partners.map(p => p.targetOrganizationId);
+    return await db.query.organization.findMany({
+      where: notInArray(organization.id, [organizationId, ...partnerIds]),
+    });
   }
 }

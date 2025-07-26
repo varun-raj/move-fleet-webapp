@@ -1,14 +1,15 @@
 import { Organization, partnership } from "@/db/schema";
 import axios from "axios";
 import API from "../utils/API";
-import { CREATE_PARTNERSHIP_PATH } from "@/config/routes";
+import { CREATE_PARTNERSHIP_PATH, LIST_NON_PARTNERS_PATH } from "@/config/routes";
 import { LIST_PARTNERSHIPS_PATH } from "@/config/routes";
 
 export type Partnership = typeof partnership.$inferSelect;
 export type PartnershipWithPartner = Partnership & { targetOrganization: Organization };
 
-export const listTransporters = async (): Promise<Organization[]> => {
-  const response = await axios.get("/api/organization/transporters");
+
+export const listNonPartners = async (organizationSlug: string): Promise<Organization[]> => {
+  const response = await axios.get(LIST_NON_PARTNERS_PATH(organizationSlug));
   return response.data;
 };
 

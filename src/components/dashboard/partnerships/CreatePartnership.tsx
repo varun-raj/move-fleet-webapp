@@ -26,7 +26,7 @@ import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 import {
   createPartnership,
-  listTransporters,
+  listNonPartners,
 } from "@/lib/apiHandlers/partnership.apiHandler";
 import {
   Select,
@@ -47,11 +47,11 @@ export default function CreatePartnership() {
   const router = useRouter();
   const { organizationSlug } = router.query;
 
-  const { data: transporters, isLoading: isLoadingTransporters } = useQuery<
+  const { data: nonPartners, isLoading: isLoadingNonPartners } = useQuery<
     Organization[]
   >({
-    queryKey: ["transporters"],
-    queryFn: () => listTransporters(),
+    queryKey: ["non-partners"],
+    queryFn: () => listNonPartners(organizationSlug as string),
   });
 
   const form = useForm<FormValues>({
@@ -66,7 +66,7 @@ export default function CreatePartnership() {
       mutationFn: (targetOrganizationId: string) => createPartnership(organizationSlug as string, targetOrganizationId),
       onSuccess: () => {
         toast.success("Partnership created successfully!");
-        router.push(`/ca/${organizationSlug}/partnerships`);
+        router.push(`/ca/${organizationSlug}/partners`);
       },
       onError: (error: Error & { response?: { data?: { error?: string } } }) => {
         toast.error(
@@ -99,13 +99,13 @@ export default function CreatePartnership() {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isLoadingTransporters}
+                    disabled={isLoadingNonPartners}
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
-                            isLoadingTransporters
+                            isLoadingNonPartners
                               ? "Loading..."
                               : "Select a transporter"
                           }
@@ -113,9 +113,9 @@ export default function CreatePartnership() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {transporters?.map((transporter) => (
-                        <SelectItem key={transporter.id} value={transporter.id!}>
-                          {transporter.name}
+                      {nonPartners?.map((nonPartner) => (
+                        <SelectItem key={nonPartner.id} value={nonPartner.id!}>
+                          {nonPartner.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

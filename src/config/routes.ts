@@ -20,6 +20,7 @@ export const GET_LOCATION_PATH = (organizationSlug: string, locationId: string) 
 // Partnerships
 export const CREATE_PARTNERSHIP_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/create`;
 export const LIST_PARTNERSHIPS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/list`;
+export const LIST_NON_PARTNERS_PATH = (organizationSlug: string) => `/api/manage/${organizationSlug}/partners/list-non-partners`;
 
 export const HOME_PATH = "/";
 export const AUTH_PATH = "/auth";

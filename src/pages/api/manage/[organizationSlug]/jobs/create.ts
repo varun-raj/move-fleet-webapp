@@ -45,7 +45,7 @@ export default async function handler(
             return res.status(400).json({ error: "Invalid locations" });
           }
 
-          const newJob = await db
+          const [createdJob] = await db
             .insert(job)
             .values({
               fromLocationId,
@@ -58,13 +58,13 @@ export default async function handler(
 
           const newConsignments = consignments.map((c) => ({
             ...c,
-            jobId: newJob[0].id,
+            jobId: createdJob.id,
             userId: member.userId,
           }));
 
           await db.insert(jobConsignment).values(newConsignments);
 
-          return res.status(201).json({ job: newJob[0] });
+          return res.status(201).json(createdJob);
         } catch (error) {
           console.error(error);
           return res.status(500).json({ error: "Internal Server Error" });
